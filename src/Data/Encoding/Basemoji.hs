@@ -15,8 +15,6 @@ instance Show Emoji where
 
 newtype Basemoji = Basemoji [Emoji]
 
-data Alphabet = Hands [Emoji] | Ages [Emoji]
-
 instance Show Basemoji where
     show (Basemoji x) = concat $ show <$> x
 
@@ -58,15 +56,18 @@ fitzPatrick :: [Emoji]
 fitzPatrick = ["\127995", "\127996", "\127997", "\127998", "\127999"]
 
 decode :: [Emoji] -> [Emoji] -> Maybe Integer
-decode alphabet = foldl (\v d -> (+) <$> ((len *) <$> v) <*> (fromIntegral <$> elemIndex d alphabet )) $ Just 0
+decode alphabet = foldl (\v d -> (+) 
+                             <$> ((len *) <$> v) 
+                             <*> (fromIntegral <$> elemIndex d alphabet )
+                        ) $ Just 0
   where len = fromIntegral $ length alphabet
 
 encode :: [Emoji] -> Integer -> [Emoji]
 encode alphabet x = f $ y x
    where f [] = [genericIndex alphabet 0]
          f a  = a
-         y s  = reverse $ unfoldr (\b -> if b == 0 
-                                         then Nothing 
-                                         else Just ((genericIndex alphabet) $ b `mod` len, b `div` len)                                           
-                                  ) s 
+         y s  = reverse $ unfoldr b s
+         b x  = if x == 0
+                then Nothing
+                else Just ((genericIndex alphabet) $ x `mod` len, x `div` len) 
          len  = fromIntegral . length $ alphabet 
